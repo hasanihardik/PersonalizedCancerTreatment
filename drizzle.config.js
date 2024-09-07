@@ -4,7 +4,7 @@ export default {
     out: './drizzle',
 
     dbCredentials: {
-        url: '',
-        connectionString:
-    }
+        url: 'import.meta.env.url',
+        connectionString: 'import.meta.env.connectionString'
+    },
 }
