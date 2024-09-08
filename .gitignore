@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+script-structure.md
 node_modules
 ./node_modules
 
@@ -16,7 +16,6 @@ dist-ssr
 .env
 ./.env
 .env
-.env.example
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

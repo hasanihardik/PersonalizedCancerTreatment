@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { DisplayInfo } from "../components/DisplayInfo";
+import { DisplayInfo } from "../components";
 
 const Home = () => {
   return <DisplayInfo />;

@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import { Sidebar } from "./components/Sidebar";
-import { Navbar } from "./components/Navbar";
+import { Sidebar, Navbar } from "./components";
 import { Home, Profile, Onboarding } from "./pages";
 import MedicalRecords from "./pages/records/index";
 import ScreeningSchedule from "./pages/ScreeningSchedule";
