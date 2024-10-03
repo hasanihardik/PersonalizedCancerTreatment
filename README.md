@@ -1,4 +1,4 @@
-# AI-Driven Personalized Cancer Treatment App
+# AI-Based Personalized Cancer Treatment App
 
 This project is an AI-powered web application designed to provide personalized cancer treatment recommendations based on patient data. The app leverages advanced machine learning algorithms, a streamlined frontend, and a robust backend to deliver accurate and efficient treatment plans tailored to individual patients.
 
