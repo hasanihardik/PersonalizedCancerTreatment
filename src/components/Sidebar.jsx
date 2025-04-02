@@ -1,62 +1,54 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
-import { sun } from "../assets";
-import { navlinks } from "../constants";
+import React, { useEffect, useState } from "react";
+import { navLinks } from "@/lib/data";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IconHeartHandshake } from "@tabler/icons-react";
-
-const Icon = ({ styles, name, imgUrl, isActive, disabled, handleClick }) => (
-  <div
-    className={`h-[48px] w-[48px] rounded-[10px] ${
-      isActive && isActive === name && "bg-[#2c2f32]"
-    } flex items-center justify-center ${
-      !disabled && "cursor-pointer"
-    } ${styles}`}
-    onClick={handleClick}
-  >
-    {!isActive ? (
-      <img src={imgUrl} alt="fund_logo" className="h-6 w-6" />
-    ) : (
-      <img
-        src={imgUrl}
-        alt="fund_logo"
-        className={`h-6 w-6 ${isActive !== name && "grayscale"}`}
-      />
-    )}
-  </div>
-);
+import Icon from "./Icon";
+import ThemeSwitch from "./ThemeSwitch";
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [isActive, setIsActive] = useState("dashboard");
+  const [activeSection, setActiveSection] = useState("");
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    setActiveSection(pathname);
+  }, [pathname]);
+
+  const handleLinkClick = (item) => {
+    setActiveSection(item.link);
+    navigate(item.link);
+  };
 
   return (
     <div className="sticky top-5 flex h-[93vh] flex-col items-center justify-between">
-      <Link to="/">
-        <div className="rounded-[10px] bg-[#2c2f32] p-2">
-          <IconHeartHandshake size={40} color="#1ec070" className=" " />
+      {/* Logo and Home link */}
+      <Link
+        to="/dashboard"
+        className="flex items-center justify-center"
+        onClick={() => setActiveSection("dashboard")}
+      >
+        <div className="rounded-full bg-[#e3e3db] p-2 transition-transform duration-200 hover:scale-105 dark:bg-[#2c2f32]">
+          <IconHeartHandshake size={40} color="#1ec070" />
         </div>
       </Link>
 
-      <div className="mt-12 flex w-[76px] flex-1 flex-col items-center justify-between rounded-[20px] bg-[#1c1c24] py-4">
+      {/* Navigation Links */}
+      <nav className="mt-12 flex w-[76px] flex-1 flex-col items-center justify-between rounded-[20px] bg-[#e9e9e9] py-4 shadow-lg transition-colors duration-200 dark:bg-[#1c1c24]">
         <div className="flex flex-col items-center justify-center gap-3">
-          {navlinks.map((link) => (
+          {navLinks.map((item) => (
             <Icon
-              key={link.name}
-              {...link}
-              isActive={isActive}
-              handleClick={() => {
-                if (!link.disabled) {
-                  setIsActive(link.name);
-                  navigate(link.link);
-                }
-              }}
+              key={item.name}
+              {...item}
+              style={`cursor-pointer`}
+              activeSection={activeSection}
+              handleClick={() => handleLinkClick(item)}
             />
           ))}
         </div>
 
-        <Icon styles="bg-[#1c1c24] shadow-secondary" imgUrl={sun} />
-      </div>
+        {/* Theme Switch */}
+        <ThemeSwitch className="mt-3 flex h-10 w-10 items-center justify-center rounded-full" />
+      </nav>
     </div>
   );
 };

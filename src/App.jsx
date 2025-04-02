@@ -1,46 +1,101 @@
 import React, { useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
-import { Sidebar, Navbar } from "./components";
-import { Home, Profile, Onboarding } from "./pages";
-import MedicalRecords from "./pages/records/index";
+import { Route, Routes } from "react-router-dom";
+import Profile from "./pages/Profile";
+import Onboarding from "./pages/Onboarding";
+import MedicalRecord from "./pages/records/MedicalRecord";
+import SingleRecordDetails from "./pages/records/SingleRecordDetail";
 import ScreeningSchedule from "./pages/ScreeningSchedule";
-import SingleRecordDetails from "./pages/records/single-record-details";
-import { useStateContext } from "./context";
+import { Buffer } from "buffer";
+import ProtectedRoutes from "./components/ProtectedRoutes";
+import Dashboard from "./pages/Dashboard";
+import { useUser } from "@clerk/clerk-react";
+import Layout from "./pages/landing/Layout";
+import Monitoring from "./pages/Monitoring";
+import Screenings from "./pages/Screenings";
+import Appointments from "./pages/Appointments";
+import NotFound from "./pages/NotFound";
+import { useUserStateContext } from "./context/UserContext";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+
+if (typeof window !== "undefined" && !window.Buffer) {
+  window.Buffer = Buffer;
+}
 
 const App = () => {
-  const { user, authenticated, ready, login, currentUser } = useStateContext();
-  const navigate = useNavigate();
+  const { user, isLoaded } = useUser();
+  const { fetchUserRecords } = useUserStateContext();
 
   useEffect(() => {
-    if (ready && !authenticated) {
-      login();
-    } else if (user && !currentUser) {
-      navigate("/onboarding");
+    if (isLoaded && user) {
+      const fetchingRecords = async () => {
+        await fetchUserRecords(user.emailAddresses[0].emailAddress);
+      };
+      fetchingRecords();
     }
-  }, [user, authenticated, ready, login, currentUser, navigate]);
+  }, [user, isLoaded]);
 
   return (
-    <div className="sm:-8 relative flex min-h-screen flex-row bg-[#13131a] p-4">
-      <div className="relative mr-10 hidden sm:flex">
-        <Sidebar />
-      </div>
+    <Routes>
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoutes>
+            <Dashboard />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoutes>
+            <Onboarding />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoutes>
+            <Profile />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/medical-records"
+        element={
+          <ProtectedRoutes>
+            <MedicalRecord />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/medical-records/:id"
+        element={
+          <ProtectedRoutes>
+            <SingleRecordDetails />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/screening-schedules"
+        element={
+          <ProtectedRoutes>
+            <ScreeningSchedule />
+          </ProtectedRoutes>
+        }
+      />
+      <Route path="/" element={<Layout />} />
+      <Route path="/appointments" element={<Appointments />} />
+      <Route path="/screenings" element={<Screenings />} />
+      <Route path="/monitoring" element={<Monitoring />} />
+      <Route path="/treatment-progress" element={<Monitoring />} />
+      <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/sign-up" element={<SignUp />} />
 
-      <div className="mx-auto max-w-[1280px] flex-1 max-sm:w-full sm:pr-5">
-        <Navbar />
-
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/medical-records" element={<MedicalRecords />} />
-          <Route
-            path="/medical-records/:id"
-            element={<SingleRecordDetails />}
-          />
-          <Route path="/screening-schedules" element={<ScreeningSchedule />} />
-        </Routes>
-      </div>
-    </div>
+      {/* Catch-all route for undefined paths */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 

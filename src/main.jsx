@@ -1,30 +1,38 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
-
-import { StateContextProvider } from "./context";
 import App from "./App";
 import "./index.css";
-import { PrivyProvider } from "@privy-io/react-auth";
+import { ThemeContextProvider } from "./context/ThemeContext";
+import { UserStateContextProvider } from "./context/UserContext";
+import { ClerkProvider } from "@clerk/clerk-react";
+import { shadesOfPurple } from "@clerk/themes";
+import ScrollToTop from "./components/ScrollToTop";
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Publishable Key");
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-
 root.render(
-  <PrivyProvider
-    appId="clz5th2t100r3sbdu44h7zzn6"
-    config={{
-      appearance: {
-        theme: "dark",
-      },
-      embeddedWallets: {
-        createOnLogin: "users-without-wallets",
-      },
-    }}
-  >
+  <React.StrictMode>
     <Router>
-      <StateContextProvider>
-        <App />
-      </StateContextProvider>
+      <ScrollToTop />
+      <ThemeContextProvider>
+        <UserStateContextProvider>
+          <ClerkProvider
+            appearance={{
+              baseTheme: shadesOfPurple,
+            }}
+            publishableKey={PUBLISHABLE_KEY}
+            afterSignOutUrl="/"
+          >
+            <App />
+          </ClerkProvider>
+        </UserStateContextProvider>
+      </ThemeContextProvider>
     </Router>
-  </PrivyProvider>,
+  </React.StrictMode>,
 );
