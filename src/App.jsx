@@ -86,10 +86,40 @@ const App = () => {
         }
       />
       <Route path="/" element={<Layout />} />
-      <Route path="/appointments" element={<Appointments />} />
-      <Route path="/screenings" element={<Screenings />} />
-      <Route path="/monitoring" element={<Monitoring />} />
-      <Route path="/treatment-progress" element={<Monitoring />} />
+      {/* Wrap Appointments, Screenings, and Monitoring with ProtectedRoutes */}
+      <Route
+        path="/appointments"
+        element={
+          <ProtectedRoutes>
+            <Appointments />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/screenings"
+        element={
+          <ProtectedRoutes>
+            <Screenings />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/monitoring"
+        element={
+          <ProtectedRoutes>
+            <Monitoring />
+          </ProtectedRoutes>
+        }
+      />
+      {/* Assuming treatment-progress should also be protected */}
+      <Route
+        path="/treatment-progress"
+        element={
+          <ProtectedRoutes>
+            <Monitoring /> {/* Or a dedicated TreatmentProgress component */}
+          </ProtectedRoutes>
+        }
+      />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/sign-up" element={<SignUp />} />
 

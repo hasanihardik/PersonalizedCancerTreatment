@@ -62,7 +62,7 @@ const MainPage = () => {
       {/* Footer */}
       <footer className="bg-green-100 py-8 dark:bg-[#0D1117]">
         <div className="container mx-auto px-4 text-center text-black dark:text-white">
-          <p>Made with ❤️ by Vinay Chhabra</p>
+          <p>Made with ❤️ by Hardik</p>
         </div>
       </footer>
     </div>

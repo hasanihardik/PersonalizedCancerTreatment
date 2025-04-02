@@ -11,29 +11,86 @@ import { createPortal } from "react-dom";
 import ColumnContainer from "./ColumnContainer";
 import TaskCard from "./TaskCard";
 import { IconPlus } from "@tabler/icons-react";
+import { useEffect } from "react"; // Import useEffect
 
-function KanbanBoard({ state }) {
-  const defaultCols =
-    state?.state?.columns?.map((col) => ({
-      id: col?.id,
-      title: col?.title,
-    })) || [];
+// Helper to parse initial data safely
+const parseInitialData = (data) => {
+  if (!data || typeof data !== 'object') {
+    return { columns: [], tasks: [] };
+  }
 
-  const defaultTasks =
-    state?.state?.tasks?.map((task) => ({
-      id: task?.id,
-      columnId: task?.columnId,
-      content: task?.content,
-    })) || [];
+  // Assuming data structure is { "Column Title 1": ["Task 1", "Task 2"], "Column Title 2": [...] }
+  // Or potentially { columns: [...], tasks: [...] } if the AI returns that structure
+  let parsedColumns = [];
+  let parsedTasks = [];
 
-  const [columns, setColumns] = useState(defaultCols);
+  if (Array.isArray(data.columns) && Array.isArray(data.tasks)) {
+      // Handle { columns: [...], tasks: [...] } structure
+      parsedColumns = data.columns.map(col => ({ id: col?.id || generateId(), title: col?.title || "Untitled" }));
+      const columnIdMap = new Map(parsedColumns.map(col => [col.title, col.id])); // Map title to ID for task assignment
+
+      parsedTasks = data.tasks.map(task => ({
+          id: task?.id || generateId(),
+          // Ensure columnId exists, fallback if needed
+          columnId: task?.columnId || columnIdMap.get(task?.columnTitle) || parsedColumns[0]?.id, // Fallback logic might need adjustment
+          content: task?.content || "Untitled Task"
+      }));
+
+  } else {
+      // Handle { "Column Title": ["Task Content", ...] } structure
+      let taskCounter = 0;
+      Object.entries(data).forEach(([columnTitle, taskContents], index) => {
+          const columnId = generateId(); // Generate ID for column
+          parsedColumns.push({ id: columnId, title: columnTitle });
+
+          if (Array.isArray(taskContents)) {
+              taskContents.forEach((content) => {
+                  parsedTasks.push({
+                      id: generateId(), // Generate ID for task
+                      columnId: columnId,
+                      content: content,
+                  });
+                  taskCounter++;
+              });
+          }
+      });
+  }
+
+
+  // Basic validation/fallback
+  if (parsedColumns.length === 0) {
+      parsedColumns = [{ id: 'todo', title: 'To Do' }];
+  }
+  // Ensure all tasks have a valid columnId
+  const validColumnIds = new Set(parsedColumns.map(c => c.id));
+  parsedTasks = parsedTasks.filter(t => validColumnIds.has(t.columnId));
+
+
+  return { columns: parsedColumns, tasks: parsedTasks };
+};
+
+
+function KanbanBoard({ initialData, recordId }) { // Accept initialData and recordId props
+  // Initialize state based on parsed initialData
+  const { columns: initialColumns, tasks: initialTasks } = useMemo(() => parseInitialData(initialData), [initialData]);
+
+  const [columns, setColumns] = useState(initialColumns);
+  const [tasks, setTasks] = useState(initialTasks);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
-  const [tasks, setTasks] = useState(defaultTasks);
+
   const [activeColumn, setActiveColumn] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
 
+  // Update state if initialData prop changes (new record selected)
+  useEffect(() => {
+    console.log("KanbanBoard: initialData prop changed for recordId:", recordId);
+    const { columns: newColumns, tasks: newTasks } = parseInitialData(initialData);
+    setColumns(newColumns);
+    setTasks(newTasks);
+  }, [initialData, recordId]); // Dependency array includes initialData and recordId
+
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 10 } }), // Reduced distance for easier drag start
   );
 
   return (
